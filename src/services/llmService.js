@@ -73,3 +73,19 @@ export const generateListResourcesMessage = async (resources) => {
        return "Here are your resources.";
    }
 };
+
+export const generateTerraformLogMessage = async (logs) => {
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                { role: 'system', content: 'You are an AWS Resource Creation Chatbot Assistant. Summarize the following Terraform logs into a clear, concise, and human-readable notification for the user. Clearly mention if the process succeeded or failed, and outline the key details without overwhelming technical jargon.' },
+                { role: 'user', content: logs }
+            ]
+        });
+        return response.choices[0].message.content;
+    } catch (error) {
+        console.error("Error generating terraform log message:", error.message);
+        return "Your infrastructure request has been processed, but I could not generate a summary of the logs. Please check the backend console for more details.";
+    }
+};

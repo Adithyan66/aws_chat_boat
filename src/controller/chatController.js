@@ -1,4 +1,4 @@
-import { processChatMessage, generateListResourcesMessage } from '../services/llmService.js';
+import { processChatMessage, generateListResourcesMessage, generateTerraformLogMessage } from '../services/llmService.js';
 import Chat from '../models/Chat.js';
 import Resource from '../models/Resource.js';
 import { generateAndRunTerraform } from '../services/terraformService.js';
@@ -46,7 +46,8 @@ export const handleChat = async (req, res) => {
             
             // Call Terraform Service here
             const tfResult = await generateAndRunTerraform(llmResponse.intent, chat.currentState.collectedData, sessionId);
-            finalReply += `\n\nTerraform Output:\n${tfResult.output}`;
+            const humanReadableLog = await generateTerraformLogMessage(tfResult.output);
+            finalReply += `\n\n${humanReadableLog}`;
             
             chat.currentState = { intent: 'NONE', collectedData: {}, status: 'IDLE' }; 
         }
