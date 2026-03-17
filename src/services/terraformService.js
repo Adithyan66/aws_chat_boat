@@ -42,7 +42,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "${data.bucketName}-${Math.floor(Math.random() * 10000)}"
+  bucket = "${data.bucketName}}"
 
   tags = {
     Environment = "Dev"
@@ -127,13 +127,7 @@ export const generateAndRunTerraform = async (intent, collectedData, sessionId) 
         status = 'FAILED';
 
         try {
-            // const { stdout: applyOut } = await execPromise(
-            //     'terraform apply -auto-approve',
-            //     { cwd: tempDir },
-            //     env: {
-            //     ...process.env
-            // }
-            // );
+
 
             const { stdout: applyOut } = await execPromise('terraform apply -auto-approve', {
                 cwd: tempDir,
