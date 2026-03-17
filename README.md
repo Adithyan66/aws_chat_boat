@@ -64,6 +64,3 @@ The backend exposes a main endpoint for chatbot interactions. The client should 
 5. **Database Storage**: Successful (or validated) configurations are saved to MongoDB in the `resources` collection.
 6. **Querying**: Natural language queries like "Show my resources" trigger the `LIST_RESOURCES` intent, which reads from MongoDB and uses OpenAI to summarize the existing infrastructure.
 
-## Assumptions
-- For testing purposes without AWS credentials, running this will execute `terraform init` and `terraform validate` locally. Standard validation succeeds even without real IAM credentials, confirming syntax correctness.
-- AWS credentials (if used for `plan` or `apply`) should be exported as standard environment variables (`AWS_ACCESS_KEY_ID`, etc.) before starting the Node server.

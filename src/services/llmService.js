@@ -15,7 +15,7 @@ Supported Intents:
    - Required entities: region, instanceType, instanceName.
 2. CREATE_S3: The user wants to create an S3 bucket.
    - Required entities: region, bucketName.
-3. LIST_RESOURCES: The user wants to view their existing resources.
+3. LIST_RESOURCES: The user wants to view their existing resources. Include an optional \`resourceTypeFilter\` if they specifically ask for "EC2" (servers) or "S3" (storage/buckets). Otherwise leave it empty or "ALL".
 4. UNSUPPORTED: The user wants to do something AWS-related but not EC2/S3 (e.g., SQS, RDS).
 5. NONE: Conversational chatter not directly related to the above.
 
@@ -29,7 +29,8 @@ Response Format (JSON exactly like this):
     "region": "us-east-1", 
     "instanceType": "t2.micro",
     "instanceName": "my-server",
-    "bucketName": "my-logs-bucket"
+    "bucketName": "my-logs-bucket",
+    "resourceTypeFilter": "EC2" // or "S3" or "ALL" for LIST_RESOURCES
   },
   "isComplete": boolean, // true ONLY IF the intent is CREATE_EC2/CREATE_S3 and ALL required entities are present. For LIST, UNSUPPORTED, NONE, this is true.
   "replyMessage": "String" // What to say back to the user. If isComplete is false, ask for the missing required entities naturally. If UNSUPPORTED, mention what you support. If LIST_RESOURCES, just say "Fetching your resources...". If isComplete is true for CREATE, say "I have all the details. Generating Terraform code..."

@@ -33,9 +33,22 @@ export const handleChat = async (req, res) => {
 
         // 3. Handle Special Actions Based on Intent and Completeness
         if (llmResponse.intent === 'LIST_RESOURCES') {
-            const resources = await Resource.find({ sessionId });
+            const filterMap = {
+                'EC2': 'EC2',
+                'S3': 'S3'
+            };
+
+            const query = { sessionId };
+            const requestedType = llmResponse.collectedData.resourceTypeFilter;
+            
+            if (requestedType && filterMap[requestedType.toUpperCase()]) {
+                query.resourceType = filterMap[requestedType.toUpperCase()];
+            }
+
+            const resources = await Resource.find(query);
             if (resources.length === 0) {
-                finalReply = "You don't have any resources created yet.";
+                const typeName = requestedType && filterMap[requestedType.toUpperCase()] ? filterMap[requestedType.toUpperCase()] : 'resources';
+                finalReply = `You don't have any ${typeName} created yet.`;
             } else {
                 finalReply = await generateListResourcesMessage(resources);
             }
