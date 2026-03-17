@@ -127,10 +127,20 @@ export const generateAndRunTerraform = async (intent, collectedData, sessionId) 
         status = 'FAILED';
 
         try {
-            const { stdout: applyOut } = await execPromise(
-                'terraform apply -auto-approve',
-                { cwd: tempDir }
-            );
+            // const { stdout: applyOut } = await execPromise(
+            //     'terraform apply -auto-approve',
+            //     { cwd: tempDir },
+            //     env: {
+            //     ...process.env
+            // }
+            // );
+
+            const { stdout: applyOut } = await execPromise('terraform apply -auto-approve', {
+                cwd: tempDir,
+                env: {
+                    ...process.env
+                }
+            });
             output += `\n[terraform apply]\n${applyOut}\n`;
             status = 'CREATED';
         } catch (err) {
