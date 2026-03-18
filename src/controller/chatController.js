@@ -38,25 +38,32 @@ export const handleChat = async (req, res) => {
             const result = await generateMongooseQuery(message);
             console.log(result);
 
+            console.log(result.method);
+            console.log(result.filter);
+            console.log(result.pipeline);
+            console.log(result.explanation);
+
             const resolved = resolveDateTokens(result);
 
             let resources;
 
             if (resolved.method === 'find') {
-                resources = await Resource.find(resolved.filter);
+                let query = Resource.find(resolved.filter);
+                if (resolved.sort) query = query.sort(resolved.sort);
+                if (resolved.limit) query = query.limit(resolved.limit);
+                resources = await query;
             } else if (resolved.method === 'findOne') {
-                resources = await Resource.findOne(resolved.filter);
+                resources = await Resource.findOne(resolved.filter).sort(resolved.sort || {});
             } else if (resolved.method === 'countDocuments') {
                 resources = await Resource.countDocuments(resolved.filter);
             } else if (resolved.method === 'aggregate') {
                 resources = await Resource.aggregate(resolved.pipeline);
             }
 
-    
-                finalReply = await generateQueryAnswer(message, resources, result.explanation);
-                console.log(finalReply);
-                
-            
+            finalReply = await generateQueryAnswer(message, resources, result.explanation);
+            console.log(finalReply);
+
+
             chat.currentState = { intent: 'NONE', collectedData: {}, status: 'IDLE' };
         }
         else if ((llmResponse.intent === 'CREATE_EC2' || llmResponse.intent === 'CREATE_S3') && llmResponse.isComplete) {
@@ -100,7 +107,7 @@ const resolveDateTokens = (obj) => {
     const yesterdayStart = new Date(todayStart);
     yesterdayStart.setDate(yesterdayStart.getDate() - 1);
 
-    const yesterdayEnd = new Date(todayStart); // yesterday ends where today starts
+    const yesterdayEnd = new Date(todayStart); 
 
     const weekStart = new Date(todayStart);
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
@@ -109,12 +116,12 @@ const resolveDateTokens = (obj) => {
     monthStart.setDate(1);
 
     const str = JSON.stringify(obj)
-        .replace(/"\$\$TODAY_START\$\$"/g,     `"${todayStart.toISOString()}"`)
-        .replace(/"\$\$TODAY_END\$\$"/g,       `"${todayEnd.toISOString()}"`)
+        .replace(/"\$\$TODAY_START\$\$"/g, `"${todayStart.toISOString()}"`)
+        .replace(/"\$\$TODAY_END\$\$"/g, `"${todayEnd.toISOString()}"`)
         .replace(/"\$\$YESTERDAY_START\$\$"/g, `"${yesterdayStart.toISOString()}"`)
-        .replace(/"\$\$YESTERDAY_END\$\$"/g,   `"${yesterdayEnd.toISOString()}"`)
-        .replace(/"\$\$WEEK_START\$\$"/g,      `"${weekStart.toISOString()}"`)
-        .replace(/"\$\$MONTH_START\$\$"/g,     `"${monthStart.toISOString()}"`);
+        .replace(/"\$\$YESTERDAY_END\$\$"/g, `"${yesterdayEnd.toISOString()}"`)
+        .replace(/"\$\$WEEK_START\$\$"/g, `"${weekStart.toISOString()}"`)
+        .replace(/"\$\$MONTH_START\$\$"/g, `"${monthStart.toISOString()}"`);
 
     return JSON.parse(str);
 };
